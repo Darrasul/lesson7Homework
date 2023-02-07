@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+ <div align="center" id="table">
+  <table>
+   <thead>
+   <td>id</td>
+   <td>name</td>
+   <td>age</td>
+   <td>buttons</td>
+   </thead>
+   <tbody>
+   <tr th:each="student : ${students}">
+    <td><span th:text="${student.id}"></span></td>
+    <td><span th:text="${student.name}"></span></td>
+    <td><span th:text="${student.age}"></span></td>
+    <td>
+     <form th:action="@{/api/v1/} + ${student.id}" method="get">
+      <button type="submit">Inspect</button>
+     </form>
+     <form th:action="@{/api/v1/delete/} + ${student.id}" method="post">
+      <button type="submit">Delete</button>
+     </form>
+    </td>
+   </tr>
+   </tbody>
+  </table>
+<!--  По какой-то неведомой мне причине пагинация не отрабатывает. Скрин wtf.png в папке screens - ровно та же ссылка вписанная руками срабатывает,
+ но не по кнопке. Заменил не отрабатывающие кнопки на ссылки, задача была на бекенде, а я уже час буксую на фронте-->
+  <div th:unless="${students.isEmpty()}">
+   <nav>
+    <ul class="pagination">
+     <li th:if="${!students.isFirst()} ? 'active'">
+<!--      <form th:action="@{/api/v1(page=${students.number}, size=${students.size})}" method="get">-->
+<!--       <button type="submit">Previous</button>-->
+<!--      </form>-->
+      <a th:href="@{/api/v1(page=${students.number})}">Previous</a>
+     </li>
+     <li th:if="${students.isFirst()} ? 'active'">
+      <form>
+       <button>First page</button>
+      </form>
+     </li>
+     <li th:each="num : ${#numbers.sequence(1, students.totalPages)}"
+     th:classappend="${num == students.number + 1} ? 'active'">
+      <form th:action="@{/api/v1(page=${num}, size=${students.size})}" method="get">
+<!--       <button th:if="${num != students.number + 1}" type="submit">[[${num}]]</button>-->
+       <button th:if="${num == students.number + 1}" type="submit">Current</button>
+      </form>
+      <a th:if="${num != students.number + 1}" th:href="@{/api/v1(page=${num})}">[[${num}]]</a>
+     </li>
+     <li th:if="${!students.isLast()} ? 'active'">
+<!--      <form th:action="@{/api/v1(page=${students.number + 2}, size=${students.size})}" method="get">-->
+<!--       <button type="submit">Next</button>-->
+<!--      </form>-->
+      <a th:href="@{/api/v1(page=${students.number + 2})}">Next</a>
+     </li>
+     <li th:if="${students.isLast()} ? 'active'">
+      <form>
+       <button>Last page</button>
+      </form>
+     </li>
+    </ul>
+   </nav>
+  </div>
+ </div>
+<div id="addingStudent">
+    <form th:action="@{/api/v1/create}" method="post">
+        <input type="hidden" name="id" id="id" th:field="*{newStudent.id}">
+        <input type="text" name="name" id="name" placeholder="Enter new name" th:field="*{newStudent.name}">
+        <input type="text" name="age" id="age" placeholder="Enter new age" th:field="*{newStudent.age}">
+        <button type="submit">Create</button>
+    </form>
+</div>
+</body>
+</html>
